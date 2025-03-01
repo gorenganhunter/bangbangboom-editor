@@ -90,7 +90,7 @@ export function toD4CFormat(map: EditMap): D4CExport {
         if (i > 0) {
             for (let j = 0; j < i; j++) {
                 const ntp = arr[j + 1];
-                fb += Math.round((ntp.time - arr[j].time) / 60 * arr[j].bpm)
+                fb += Math.round((ntp.time - arr[j].time) / 60 * arr[j].bpm * 1000) / 1000
             }
         }
         return {
