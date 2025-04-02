@@ -57,16 +57,16 @@ const handleDown = action((e: MouseEvent | TouchEvent) => {
   state.selectingStartLeft = state.pointerLeftPercent
   state.selectingStartTime = state.pointerTime
   if (!e.ctrlKey) {
-    state.selectedNotes.clear()
+    state.selectedTimescales.clear()
   }
 })
 const stopSelect = action(() => {
   if (!state.selecting) return
   selectPointer = -1
   state.selecting = false
-  for (const n of state.selectingNotes)
-    state.selectedNotes.add(n)
-  state.selectingNotes = []
+  for (const ts of state.selectingTimescales)
+    state.selectedTimescales.add(ts)
+  state.selectingTimescales = []
   state.preventClick++
   setTimeout(() => state.preventClick--, 50)
 })
@@ -80,7 +80,7 @@ window.addEventListener("touchend", e => {
 const handleMove = action((e: MouseEvent | TouchEvent) => {
   flushPointerPos(e)
   if (!("buttons" in e) || e.buttons & 3) {
-    if (state.draggingNote < 0 && !state.selecting)
+    if (state.draggingTimescale < 0 && !state.selecting)
       if (Math.abs(state.pointerTime - state.selectingStartTime) > 50 / MappingState.timeHeightFactor
         || Math.abs(state.pointerLeftPercent - state.selectingStartLeft) > 10) {
         state.selecting = true
@@ -90,17 +90,10 @@ const handleMove = action((e: MouseEvent | TouchEvent) => {
     if (state.selecting) stopSelect()
   }
   if (state.selecting) {
-    const list = MappingState.noteListOrdered
+    const list = MappingState.timescaleListOrdered
     const start = binarySearch(i => list[i].realtimecache, list.length, state.pointerTime)[0]
     const end = binarySearch(i => list[i].realtimecache, list.length, state.selectingStartTime)[0]
-    state.selectingNotes = (list.slice(Math.min(start, end), Math.max(start, end)))
-      .filter(x => {
-        const left = x.lane * 10 + 20
-        const min = Math.min(state.pointerLeftPercent, state.selectingStartLeft)
-        const max = Math.max(state.pointerLeftPercent, state.selectingStartLeft)
-        if (left >= min && left <= max) return true
-        return false
-      }).map(x => x.id)
+    state.selectingTimescales = (list.slice(Math.min(start, end), Math.max(start, end))).map(x => x.id)
   }
 })
 

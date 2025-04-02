@@ -1,11 +1,14 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { makeStyles } from "@material-ui/core/styles"
 import { GridD1, MappingState, GridD2, GridD3, GridD4 } from "../sharedState"
 import { Music } from "../../../states"
 import { useObserver } from "mobx-react-lite"
-import { range, TimeToString } from "../../../../Common/utils"
+import { range, TimeToString, assert } from "../../../../Common/utils"
 import { useStyles as useLayerStyle } from "./styles"
 import { scope } from "../../../../MappingScope/scope"
+import { action } from "mobx"
+import { state } from "./state"
+import { TimeScale } from "../../../../MappingScope/EditMap"
 
 const useStyles = makeStyles(theme => ({
   vertline: { borderLeft: "1.2px solid lightgray", height: "100%", position: "absolute", pointerEvents: "none" },
@@ -26,11 +29,178 @@ const useStyles = makeStyles(theme => ({
     position: "absolute", color: "yellow", width: "95%",
     borderBottom: "1.2px yellow solid", height: "1.5em"
   },
+  // tsSelected: {
+  //   position: "absolute", color: "blue", width: "100%",
+  //   borderBottom: "1.5px blue solid", height: "2em"
+  // },
 }))
 
 const bottomstyle = (time: number) => ({ bottom: (MappingState.timeHeightFactor * time) + "px" })
 
 const vertlines = range(15, 90, 10)
+
+let dragPointer = -1;
+const downEventHandler = action((tsid: number) => {
+    return action(
+        (
+            e:
+                | React.MouseEvent<HTMLDivElement>
+                | React.TouchEvent<HTMLDivElement>
+        ) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const ts = assert(scope.map.timescales.get(tsid));
+            if (dragPointer < 0) {
+                if ("buttons" in e) {
+                    if (!(e.buttons & 3)) return;
+                    dragPointer = e.button;
+                } else {
+                    dragPointer = e.changedTouches[0].identifier;
+                }
+            }
+            state.draggingTimescale = tsid;
+            if (!e.ctrlKey && !state.selectedTimescales.has(ts.id))
+                state.selectedTimescales.clear();
+            // state.slideNote1Beat = undefined;
+        }
+    );
+});
+
+const handleUp = action((e: MouseEvent | TouchEvent) => {
+    if ("buttons" in e) {
+        if (e.button !== dragPointer) return;
+    } else {
+        if (e.changedTouches[0].identifier !== dragPointer) return;
+    }
+    dragPointer = -1;
+    if (state.draggingTimescale >= 0) {
+        const ts = assert(scope.map.timescales.get(state.draggingTimescale));
+        const draggingSelected = state.draggingSelected;
+        state.draggingTimescale = -1; // important: after get draggingselected !!!
+        if (!state.pointerBeat) return;
+        if (state.pointerLane < 0) return;
+        const dt = state.pointerBeat.realtime - ts.realtimecache;
+        if (!dt) return;
+
+        const before = new Set<number>();
+        const copy = e.ctrlKey;
+        if (copy) for (const t of scope.map.timescalelist) before.add(t.id);
+
+        if (draggingSelected) {
+            if (copy)
+                scope.map.copyManyTS(
+                    state.getSelectedTimescales(),
+                    dt,
+                    0,
+                    Music.duration,
+                    MappingState.division
+                );
+            else
+                scope.map.moveMany(
+                    [],
+                    state.getSelectedTimescales(),
+                    dt,
+                    0,
+                    Music.duration,
+                    0,
+                    MappingState.division
+                );
+        } else {
+            if (copy)
+                scope.map.copyManyTS(
+                    [ts],
+                    dt,
+                    0,
+                    Music.duration,
+                    MappingState.division
+                );
+            else
+                scope.map.moveMany(
+                    [],
+                    [ts],
+                    dt,
+                    0,
+                    Music.duration,
+                    0,
+                    MappingState.division
+                );
+        }
+
+        setTimeout(
+            action(() => {
+                if (copy && scope.map.timescales.size !== before.size) {
+                    state.selectedTimescales.clear();
+                    for (const n of scope.map.timescalelist) {
+                        if (!before.has(n.id)) {
+                            state.selectedTimescales.add(n.id);
+                        }
+                    }
+                }
+            })
+        );
+
+        state.preventClick++;
+        setTimeout(() => state.preventClick--, 50);
+    }
+});
+window.addEventListener("mouseup", handleUp);
+window.addEventListener("touchend", handleUp);
+
+const removeTimescale = (ts: TimeScale) => {
+    if (state.selectedTimescales.has(ts.id)) {
+        scope.map.removeTimescales(state.getSelectedTimescales());
+    } else {
+        scope.map.removeTimescales([ts]);
+    }
+};
+
+const clickEventHandler = (tsid: number) => {
+    return (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        // if (state.preventClick) return
+        const ts = assert(scope.map.timescales.get(tsid));
+        if (e.ctrlKey) {
+            if (state.selectedTimescales.has(ts.id))
+                state.selectedTimescales.delete(ts.id);
+            else state.selectedTimescales.add(ts.id);
+        } else {
+            // switch (MappingState.tool) {
+            //     case "set":
+            //         scope.map.setNoteTsGroup(note, MappingState.group === -10 ? (note.lane === 0 || note.lane === 6) ? -2 : -1 : MappingState.group)
+            //         // removeNote(note);
+            //         break;
+            // }
+        }
+    };
+};
+
+// const doubleClickHandler = (nid: number) => {
+//     return (e: React.MouseEvent) => {
+//         e.stopPropagation();
+//         e.preventDefault();
+//         if (state.preventClick) return;
+//         const note = assert(scope.map.notes.get(nid));
+//         if (note.type === "single") scope.map.toggleTap(note)
+//         // if (note.type === "slide") {
+//         //     const s = assert(scope.map.slides.get(note.slide));
+//         //     if (note.id === s.notes[s.notes.length - 1])
+//         //         scope.map.toggleFlickend(s.id);
+//         // } else {
+//         //     scope.map.toggleFlick(note);
+//         // }
+//     };
+// };
+
+const contextMenuHandler = (tsid: number) => {
+    return (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (state.preventClick) return;
+        const ts = assert(scope.map.timescales.get(tsid));
+        removeTimescale(ts);
+    };
+};
 
 const LaneAndTime = () => {
   const cn = useStyles()
@@ -82,14 +252,30 @@ const TimepointStart = () => {
 
 const TimescaleStart = () => {
 
-  const cn = useStyles()
-
   return useObserver(() => <>
     {scope.map.timescalelist.filter(({ tsgroup }) => /* MappingState.group === -10 ||  */MappingState.group === tsgroup).map(ts =>
-      <div className={cn.ts} key={ts.id} style={bottomstyle(ts.realtimecache)}>
-        <div className={cn.time}>{ts.timescale}x</div>
-      </div>)}
+      <TimescaleEl ts={ts} />)}
   </>)
+}
+
+const TimescaleEl = ({ ts }: { ts: TimeScale }) => {
+  const cn = useStyles()
+
+    const onMouseDown = useMemo(() => downEventHandler(ts.id), [ts.id]);
+    const onContextMenu = useMemo(() => contextMenuHandler(ts.id), [ts.id]);
+    // const onDoubleClick = useMemo(() => doubleClickHandler(note.id), [note.id]);
+    const onClick = useMemo(() => clickEventHandler(ts.id), [ts.id]);
+
+  // const props = {
+  //   onMouseDown,
+  //   onContextMenu,
+  //   onClick
+  // }
+
+  return useObserver(() => 
+    <div className={cn.ts} key={ts.id} style={bottomstyle(ts.realtimecache)} onClick={onClick} onMouseDown={onMouseDown} onContextMenu={onContextMenu}>
+      <div className={cn.time}>{ts.timescale}x</div>
+    </div>)
 }
 
 const GridLayer = () => {

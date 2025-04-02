@@ -3,7 +3,7 @@ import { MappingState } from "../sharedState"
 import { scope } from "../../../../MappingScope/scope"
 import { useRef, useEffect } from "react"
 import { itemList } from "../../../../Common/utils"
-import { NoteType } from "../../../../MappingScope/EditMap"
+import { NoteType, TimeScale } from "../../../../MappingScope/EditMap"
 
 class State {
 
@@ -52,34 +52,34 @@ class State {
 
   @observable preventClick = 0
 
-  @observable draggingNote = -1
+  @observable draggingTimescale = -1
 
   @observable selecting = false
   @observable selectingStartTime = 0
   @observable selectingStartLeft = 0
-  @observable selectingNotes: number[] = []
+  @observable selectingTimescales: number[] = []
 
-  @observable selectedNotes = new Set<number>()
+  @observable selectedTimescales = new Set<number>()
 
   @observable selectedSoflan: number = -10
 
-  getSelectedNotes = () => {
-    const selected = new Set<NoteType>()
-    for (const nid of this.selectedNotes) {
-      const n = scope.map.notes.get(nid)
+  getSelectedTimescales = () => {
+    const selected = new Set<TimeScale>()
+    for (const nid of this.selectedTimescales) {
+      const n = scope.map.timescales.get(nid)
       if (n) selected.add(n)
     }
-    for (const nid of this.selectingNotes) {
-      const n = scope.map.notes.get(nid)
+    for (const nid of this.selectingTimescales) {
+      const n = scope.map.timescales.get(nid)
       if (n) selected.add(n)
     }
     return itemList(selected)
   }
 
   @computed get draggingSelected() {
-    const n = scope.map.notes.get(this.draggingNote)
+    const n = scope.map.timescales.get(this.draggingTimescale)
     if (!n) return false
-    return this.selectedNotes.has(n.id)
+    return this.selectedTimescales.has(n.id)
   }
 
   constructor() {

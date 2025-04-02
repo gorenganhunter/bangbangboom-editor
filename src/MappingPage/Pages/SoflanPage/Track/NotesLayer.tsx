@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { NoteType } from "../../../../MappingScope/EditMap";
+import { NoteType, TimeScale } from "../../../../MappingScope/EditMap";
 import { MappingState } from "../sharedState";
 import { useStyles, useNoteStyles } from "./styles";
 import assets from "../../../assets";
@@ -10,121 +10,118 @@ import { useMirror, state } from "./state";
 import { useObserver } from "mobx-react-lite";
 import { action } from "mobx";
 
-let dragPointer = -1;
-const downEventHandler = action((nid: number) => {
-    return action(
-        (
-            e:
-                | React.MouseEvent<HTMLImageElement>
-                | React.TouchEvent<HTMLImageElement>
-        ) => {
-            e.stopPropagation();
-            e.preventDefault();
-            const note = assert(scope.map.notes.get(nid));
-            if (dragPointer < 0) {
-                if ("buttons" in e) {
-                    if (!(e.buttons & 3)) return;
-                    dragPointer = e.button;
-                } else {
-                    dragPointer = e.changedTouches[0].identifier;
-                }
-            }
-            state.draggingNote = nid;
-            if (!e.ctrlKey && !state.selectedNotes.has(note.id))
-                state.selectedNotes.clear();
-            state.slideNote1Beat = undefined;
-        }
-    );
-});
+// let dragPointer = -1;
+// const downEventHandler = action((tsid: number) => {
+//     return action(
+//         (
+//             e:
+//                 | React.MouseEvent<HTMLImageElement>
+//                 | React.TouchEvent<HTMLImageElement>
+//         ) => {
+//             e.stopPropagation();
+//             e.preventDefault();
+//             const ts = assert(scope.map.timescales.get(tsid));
+//             if (dragPointer < 0) {
+//                 if ("buttons" in e) {
+//                     if (!(e.buttons & 3)) return;
+//                     dragPointer = e.button;
+//                 } else {
+//                     dragPointer = e.changedTouches[0].identifier;
+//                 }
+//             }
+//             state.draggingTimescale = tsid;
+//             if (!e.ctrlKey && !state.selectedTimescales.has(ts.id))
+//                 state.selectedTimescales.clear();
+//             // state.slideNote1Beat = undefined;
+//         }
+//     );
+// });
 
-const handleUp = action((e: MouseEvent | TouchEvent) => {
-    if ("buttons" in e) {
-        if (e.button !== dragPointer) return;
-    } else {
-        if (e.changedTouches[0].identifier !== dragPointer) return;
-    }
-    dragPointer = -1;
-    if (state.draggingNote >= 0) {
-        const note = assert(scope.map.notes.get(state.draggingNote));
-        const draggingSelected = state.draggingSelected;
-        state.draggingNote = -1; // important: after get draggingselected !!!
-        if (!state.pointerBeat) return;
-        if (state.pointerLane < 0) return;
-        const dt = state.pointerBeat.realtime - note.realtimecache;
-        const dl = state.pointerLane - note.lane;
-        if (!dt && !dl) return;
+// const handleUp = action((e: MouseEvent | TouchEvent) => {
+//     if ("buttons" in e) {
+//         if (e.button !== dragPointer) return;
+//     } else {
+//         if (e.changedTouches[0].identifier !== dragPointer) return;
+//     }
+//     dragPointer = -1;
+//     if (state.draggingTimescale >= 0) {
+//         const ts = assert(scope.map.timescales.get(state.draggingTimescale));
+//         const draggingSelected = state.draggingSelected;
+//         state.draggingTimescale = -1; // important: after get draggingselected !!!
+//         if (!state.pointerBeat) return;
+//         if (state.pointerLane < 0) return;
+//         const dt = state.pointerBeat.realtime - ts.realtimecache;
+//         if (!dt) return;
 
-        const before = new Set<number>();
-        const copy = e.ctrlKey;
-        if (copy) for (const n of scope.map.notelist) before.add(n.id);
+//         const before = new Set<number>();
+//         const copy = e.ctrlKey;
+//         if (copy) for (const t of scope.map.timescalelist) before.add(t.id);
 
-        if (draggingSelected) {
-            if (copy)
-                scope.map.copyMany(
-                    state.getSelectedNotes(),
-                    dt,
-                    0,
-                    Music.duration,
-                    dl,
-                    MappingState.division
-                );
-            else
-                scope.map.moveMany(
-                    state.getSelectedNotes(),
-                    [],
-                    dt,
-                    0,
-                    Music.duration,
-                    dl,
-                    MappingState.division
-                );
-        } else {
-            if (copy)
-                scope.map.copyMany(
-                    [note],
-                    dt,
-                    0,
-                    Music.duration,
-                    dl,
-                    MappingState.division
-                );
-            else
-                scope.map.moveMany(
-                    [note],
-                    [],
-                    dt,
-                    0,
-                    Music.duration,
-                    dl,
-                    MappingState.division
-                );
-        }
+//         if (draggingSelected) {
+//             if (copy)
+//                 scope.map.copyManyTS(
+//                     state.getSelectedTimescales(),
+//                     dt,
+//                     0,
+//                     Music.duration,
+//                     MappingState.division
+//                 );
+//             else
+//                 scope.map.moveMany(
+//                     [],
+//                     state.getSelectedTimescales(),
+//                     dt,
+//                     0,
+//                     Music.duration,
+//                     0,
+//                     MappingState.division
+//                 );
+//         } else {
+//             if (copy)
+//                 scope.map.copyManyTS(
+//                     [ts],
+//                     dt,
+//                     0,
+//                     Music.duration,
+//                     MappingState.division
+//                 );
+//             else
+//                 scope.map.moveMany(
+//                     [],
+//                     [ts],
+//                     dt,
+//                     0,
+//                     Music.duration,
+//                     0,
+//                     MappingState.division
+//                 );
+//         }
 
-        setTimeout(
-            action(() => {
-                if (copy && scope.map.notes.size !== before.size) {
-                    state.selectedNotes.clear();
-                    for (const n of scope.map.notelist) {
-                        if (!before.has(n.id)) {
-                            state.selectedNotes.add(n.id);
-                        }
-                    }
-                }
-            })
-        );
+//         setTimeout(
+//             action(() => {
+//                 if (copy && scope.map.timescales.size !== before.size) {
+//                     state.selectedTimescales.clear();
+//                     for (const n of scope.map.timescalelist) {
+//                         if (!before.has(n.id)) {
+//                             state.selectedTimescales.add(n.id);
+//                         }
+//                     }
+//                 }
+//             })
+//         );
 
-        state.preventClick++;
-        setTimeout(() => state.preventClick--, 50);
-    }
-});
+//         state.preventClick++;
+//         setTimeout(() => state.preventClick--, 50);
+//     }
+// });
 // window.addEventListener("mouseup", handleUp);
 // window.addEventListener("touchend", handleUp);
 
-// const removeNote = (note: NoteType) => {
-//     if (state.selectedNotes.has(note.id)) {
-//         scope.map.removeNotes(state.getSelectedNotes());
+// const removeNote = (ts: TimeScale) => {
+//     if (state.selectedTimescales.has(ts.id)) {
+//         scope.map.removeTimescales(state.getSelectedTimescales());
 //     } else {
-//         scope.map.removeNotes([note]);
+//         scope.map.removeTimescales([ts]);
 //     }
 // };
 
@@ -135,9 +132,9 @@ const clickEventHandler = (nid: number) => {
         // if (state.preventClick) return
         const note = assert(scope.map.notes.get(nid));
         if (e.ctrlKey) {
-            if (state.selectedNotes.has(note.id))
-                state.selectedNotes.delete(note.id);
-            else state.selectedNotes.add(note.id);
+            // if (state.selectedNotes.has(note.id))
+            //     state.selectedNotes.delete(note.id);
+            // else state.selectedNotes.add(note.id);
         } else {
             switch (MappingState.tool) {
                 case "set":

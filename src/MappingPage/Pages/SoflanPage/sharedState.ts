@@ -68,6 +68,10 @@ class State {
     return scope.map.notelist.slice().sort((a, b) => a.realtimecache - b.realtimecache)
   }
 
+  @computed get timescaleListOrdered() {
+    return scope.map.timescalelist.slice().sort((a, b) => a.realtimecache - b.realtimecache)
+  }
+
   constructor() {
     reaction(() => this.tracking, t => {
       const offset = 100 / this.timeHeightFactor

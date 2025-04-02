@@ -6,6 +6,7 @@ import { MappingState } from "../sharedState"
 import { Cross, Rect } from "./SVGs"
 import { entryList } from "../../../../Common/utils"
 import { scope } from "../../../../MappingScope/scope"
+import { makeStyles } from "@material-ui/core"
 
 const createStyle = (time: number, lane: number) => {
   return {
@@ -13,6 +14,12 @@ const createStyle = (time: number, lane: number) => {
     left: lane * 10 + 15 + "%"
   }
 }
+
+const createLineStyle = (time: number): React.CSSProperties => ({
+  position: "absolute", color: "aqua", width: "95%",
+  borderBottom: "1.2px aqua solid", height: "1.5em",
+  bottom: (MappingState.timeHeightFactor * time) + "px"
+})
 
 const PointerPos = () => {
   const cn = useNoteStyles()
@@ -47,37 +54,37 @@ const SlideNote1 = () => {
   return <Rect className={cn.note + " " + cn.noevent} style={style} />
 }
 
-const DragOneNote = () => {
-  const cn = useNoteStyles()
-  const style = useObserver(() => {
-    if (state.draggingNote < 0) return
-    if (state.pointerLane < 0) return
-    const n = scope.map.notes.get(state.draggingNote)
-    if (!n) return
-    const beat = state.pointerBeat
-    if (!beat) return
-    const time = beat.realtime
-    if (time === n.realtimecache && state.pointerLane === n.lane) return
-    return {
-      from: { ...createStyle(n.realtimecache, n.lane), color: "#a0a0a0" },
-      to: { ...createStyle(time, state.pointerLane), color: "#e0e0e0" }
-    }
-  })
-  if (!style) return null
-  return <>
-    <Rect className={cn.note + " " + cn.noevent} style={style.from} />
-    <Rect className={cn.note + " " + cn.noevent} style={style.to} />
-  </>
-}
+// const DragOneNote = () => {
+//   const cn = useNoteStyles()
+//   const style = useObserver(() => {
+//     if (state.draggingNote < 0) return
+//     if (state.pointerLane < 0) return
+//     const n = scope.map.notes.get(state.draggingNote)
+//     if (!n) return
+//     const beat = state.pointerBeat
+//     if (!beat) return
+//     const time = beat.realtime
+//     if (time === n.realtimecache && state.pointerLane === n.lane) return
+//     return {
+//       from: { ...createStyle(n.realtimecache, n.lane), color: "#a0a0a0" },
+//       to: { ...createStyle(time, state.pointerLane), color: "#e0e0e0" }
+//     }
+//   })
+//   if (!style) return null
+//   return <>
+//     <Rect className={cn.note + " " + cn.noevent} style={style.from} />
+//     <Rect className={cn.note + " " + cn.noevent} style={style.to} />
+//   </>
+// }
 
-const SelectedNotes = () => {
+const SelectedTimescales = () => {
   const cn = useNoteStyles()
   const props = useObserver(() => {
     const className = cn.note + " " + cn.noevent
     const map = new Map<number, React.SVGProps<SVGSVGElement>>()
-    for (const n of state.getSelectedNotes()) {
-      map.set(n.id, {
-        key: n.id, style: { ...createStyle(n.realtimecache, n.lane), color: "rgba(102, 183, 255, 0.8)" }, className
+    for (const ts of state.getSelectedTimescales()) {
+      map.set(ts.id, {
+        key: ts.id, style: createLineStyle(ts.realtimecache), className
       })
     }
     return entryList(map).map(x => x[1])
@@ -115,8 +122,8 @@ const ActionPreview = () => {
   return (
     <div className={cn.layer} ref={layer}>
       <SlideNote1 />
-      <SelectedNotes />
-      <DragOneNote />
+      <SelectedTimescales />
+      {/* <DragOneNote /> */}
       <Selection />
       <PointerPos />
     </div>)

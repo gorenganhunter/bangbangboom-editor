@@ -1,4 +1,4 @@
-import { NoteType, SingleNote, FlickNote, FreshNoteCache, TimeScale, SlideNote } from "../EditMap"
+import { NoteType, SingleNote, FlickNote, FreshNoteCache, FreshTimescaleCache, TimeScale, SlideNote } from "../EditMap"
 import { SingleFlickActions } from "./AtomActions/SingleFlick"
 import { randomId, assert, neverHappen } from "../../Common/utils"
 import { SlideActions } from "./AtomActions/Slide"
@@ -175,13 +175,13 @@ export class MapActions extends MapActionsBase {
         this.patchNote(n, { lane: targetLane })
         n.realtimecache = targetTime
       }
-      for (const n of timescales) {
-        const targetTime = n.realtimecache + timeoffset
+      for (const t of timescales) {
+        const targetTime = t.realtimecache + timeoffset
         if (targetTime > max || targetTime < min) {
-          for (const n of notes) FreshNoteCache(this.state, n)
+          for (const t of timescales) FreshTimescaleCache(this.state, t)
           return false
         }
-        n.realtimecache = targetTime
+        t.realtimecache = targetTime
       }
       this.justifyFindNearest(notes, timescales, division)
       return true
@@ -223,6 +223,22 @@ export class MapActions extends MapActionsBase {
           const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint.id, res.offset, n.tsgroup, targetLane, n.alt)
           if (!done) return false
         }
+      }
+      return true
+    }))
+  }
+  
+  @action.bound
+  copyManyTS(timescales: TimeScale[], timeoffset: number, min: number, max: number, division: number) {
+    return this.done(this.history.doTransaction(() => {
+      for (const ts of timescales) {
+        const targetTime = ts.realtimecache + timeoffset
+        if (targetTime > max || targetTime < min) {
+          return false
+        }
+        const res = assert(this.calcNearestPosition(targetTime, division))
+        const done = this.history.callAtom(TimescaleActions.Add, randomId(), ts.tsgroup, ts.timescale, res.timepoint.id, res.offset, ts.disk)
+        if (!done) return false
       }
       return true
     }))
