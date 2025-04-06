@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
   },
   ts: {
     position: "absolute", color: "yellow", width: "95%",
-    border: "1.2px yellow solid", height: "1.5em"
+    borderBottom: "1.2px yellow solid", height: "1.5em"
   },
   // tsSelected: {
   //   position: "absolute", color: "blue", width: "100%",
