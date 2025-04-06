@@ -54,33 +54,33 @@ const SlideNote1 = () => {
   return <Rect className={cn.note + " " + cn.noevent} style={style} />
 }
 
-// const DragOneNote = () => {
-//   const cn = useNoteStyles()
-//   const style = useObserver(() => {
-//     if (state.draggingNote < 0) return
-//     if (state.pointerLane < 0) return
-//     const n = scope.map.notes.get(state.draggingNote)
-//     if (!n) return
-//     const beat = state.pointerBeat
-//     if (!beat) return
-//     const time = beat.realtime
-//     if (time === n.realtimecache && state.pointerLane === n.lane) return
-//     return {
-//       from: { ...createStyle(n.realtimecache, n.lane), color: "#a0a0a0" },
-//       to: { ...createStyle(time, state.pointerLane), color: "#e0e0e0" }
-//     }
-//   })
-//   if (!style) return null
-//   return <>
-//     <Rect className={cn.note + " " + cn.noevent} style={style.from} />
-//     <Rect className={cn.note + " " + cn.noevent} style={style.to} />
-//   </>
-// }
+const DragOneNote = () => {
+  const cn = useNoteStyles()
+  const style = useObserver(() => {
+    if (state.draggingTimescale < 0) return
+    if (state.pointerLane < 0) return
+    const n = scope.map.timescales.get(state.draggingTimescale)
+    if (!n) return
+    const beat = state.pointerBeat
+    if (!beat) return
+    const time = beat.realtime
+    if (time === n.realtimecache) return
+    return {
+      from: { ...createStyle(n.realtimecache, state.pointerLane), color: "#a0a0a0" },
+      to: { ...createStyle(time, state.pointerLane), color: "#e0e0e0" }
+    }
+  })
+  if (!style) return null
+  return <>
+    <Rect className={cn.note + " " + cn.noevent} style={style.from} />
+    <Rect className={cn.note + " " + cn.noevent} style={style.to} />
+  </>
+}
 
 const SelectedTimescales = () => {
   const cn = useNoteStyles()
   const props = useObserver(() => {
-    const className = cn.note + " " + cn.noevent
+    const className = cn.noevent
     const map = new Map<number, React.SVGProps<SVGSVGElement>>()
     for (const ts of state.getSelectedTimescales()) {
       map.set(ts.id, {
@@ -91,7 +91,7 @@ const SelectedTimescales = () => {
   })
   if (props.length <= 0) return null
   return <>
-    {props.map(p => <Rect {...p} />)}
+    {props.map(p => <svg {...p} />)}
   </>
 }
 
@@ -123,7 +123,7 @@ const ActionPreview = () => {
     <div className={cn.layer} ref={layer}>
       <SlideNote1 />
       <SelectedTimescales />
-      {/* <DragOneNote /> */}
+      <DragOneNote />
       <Selection />
       <PointerPos />
     </div>)

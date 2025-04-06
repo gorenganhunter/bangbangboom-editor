@@ -197,6 +197,8 @@ const handleClick = action((e: React.MouseEvent<HTMLDivElement>) => {
     default:
       return
   }
+  state.preventClick++;
+  setTimeout(() => state.preventClick--, 50);
 })
 
 const handleMoveTouch = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -221,9 +223,13 @@ const Track = () => {
   useEffect(() => {
     window.addEventListener("mousedown", handleDown)
     window.addEventListener("mousemove", handleMove)
+    window.addEventListener("touchstart", handleDown)
+    window.addEventListener("touchmove", handleMove)
     return () => {
       window.removeEventListener("mousedown", handleDown)
       window.removeEventListener("mousemove", handleMove)
+      window.removeEventListener("touchstart", handleDown)
+      window.removeEventListener("touchmove", handleMove)
     }
   }, [])
 

@@ -1,4 +1,4 @@
-import { NoteType, SingleNote, FlickNote, FreshNoteCache, FreshTimescaleCache, TimeScale, SlideNote } from "../EditMap"
+import { NoteType, SingleNote, FlickNote, FreshNoteCache, FreshTimescaleCache, TimeScale, SlideNote, TimeScaleGroup } from "../EditMap"
 import { SingleFlickActions } from "./AtomActions/SingleFlick"
 import { randomId, assert, neverHappen } from "../../Common/utils"
 import { SlideActions } from "./AtomActions/Slide"
@@ -238,6 +238,20 @@ export class MapActions extends MapActionsBase {
         }
         const res = assert(this.calcNearestPosition(targetTime, division))
         const done = this.history.callAtom(TimescaleActions.Add, randomId(), ts.tsgroup, ts.timescale, res.timepoint.id, res.offset, ts.disk)
+        if (!done) return false
+      }
+      return true
+    }))
+  }
+
+  @action.bound
+  copyTSG(tsgroup: TimeScaleGroup, tsgid: number) {
+    return this.done(this.history.doTransaction(() => {
+      const done = this.history.callAtom(TsGroupActions.Add, tsgid, tsgroup.name + " (copy)")
+      if (!done) return false
+      for (const id of tsgroup.timescales) {
+        const ts = assert(this.timescales.get(id))
+        const done = this.history.callAtom(TimescaleActions.Add, randomId(), tsgid, ts.timescale, ts.timepoint, ts.offset, ts.disk)
         if (!done) return false
       }
       return true

@@ -9,6 +9,7 @@ import { scope } from "../../../../MappingScope/scope"
 import { action } from "mobx"
 import { state } from "./state"
 import { TimeScale } from "../../../../MappingScope/EditMap"
+import { useMirror } from "../../MappingPage/Track/state"
 
 const useStyles = makeStyles(theme => ({
   vertline: { borderLeft: "1.2px solid lightgray", height: "100%", position: "absolute", pointerEvents: "none" },
@@ -27,7 +28,7 @@ const useStyles = makeStyles(theme => ({
   },
   ts: {
     position: "absolute", color: "yellow", width: "95%",
-    borderBottom: "1.2px yellow solid", height: "1.5em"
+    border: "1.2px yellow solid", height: "1.5em"
   },
   // tsSelected: {
   //   position: "absolute", color: "blue", width: "100%",
@@ -40,6 +41,8 @@ const bottomstyle = (time: number) => ({ bottom: (MappingState.timeHeightFactor 
 const vertlines = range(15, 90, 10)
 
 let dragPointer = -1;
+let copy = 0
+let ct = 0
 const downEventHandler = action((tsid: number) => {
     return action(
         (
@@ -49,6 +52,13 @@ const downEventHandler = action((tsid: number) => {
         ) => {
             e.stopPropagation();
             e.preventDefault();
+            if (MappingState.tool === "delete") {
+
+                    state.preventClick++;
+                    setTimeout(() => state.preventClick--, 500);
+        return
+      }
+            if (Date.now() - ct > 200) copy = 0
             const ts = assert(scope.map.timescales.get(tsid));
             if (dragPointer < 0) {
                 if ("buttons" in e) {
@@ -83,11 +93,11 @@ const handleUp = action((e: MouseEvent | TouchEvent) => {
         if (!dt) return;
 
         const before = new Set<number>();
-        const copy = e.ctrlKey;
-        if (copy) for (const t of scope.map.timescalelist) before.add(t.id);
+        const isCopy = e.ctrlKey || copy;
+        if (isCopy) for (const t of scope.map.timescalelist) before.add(t.id);
 
         if (draggingSelected) {
-            if (copy)
+            if (isCopy)
                 scope.map.copyManyTS(
                     state.getSelectedTimescales(),
                     dt,
@@ -106,7 +116,7 @@ const handleUp = action((e: MouseEvent | TouchEvent) => {
                     MappingState.division
                 );
         } else {
-            if (copy)
+            if (isCopy)
                 scope.map.copyManyTS(
                     [ts],
                     dt,
@@ -128,7 +138,7 @@ const handleUp = action((e: MouseEvent | TouchEvent) => {
 
         setTimeout(
             action(() => {
-                if (copy && scope.map.timescales.size !== before.size) {
+                if (isCopy && scope.map.timescales.size !== before.size) {
                     state.selectedTimescales.clear();
                     for (const n of scope.map.timescalelist) {
                         if (!before.has(n.id)) {
@@ -158,6 +168,8 @@ const clickEventHandler = (tsid: number) => {
     return (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
+        copy = 1
+        ct = Date.now()
         // if (state.preventClick) return
         const ts = assert(scope.map.timescales.get(tsid));
         if (e.ctrlKey) {
@@ -165,12 +177,15 @@ const clickEventHandler = (tsid: number) => {
                 state.selectedTimescales.delete(ts.id);
             else state.selectedTimescales.add(ts.id);
         } else {
-            // switch (MappingState.tool) {
-            //     case "set":
-            //         scope.map.setNoteTsGroup(note, MappingState.group === -10 ? (note.lane === 0 || note.lane === 6) ? -2 : -1 : MappingState.group)
-            //         // removeNote(note);
-            //         break;
-            // }
+            switch (MappingState.tool) {
+                case "delete":
+                    if (state.selectedTimescales.has(ts.id)) {
+                        scope.map.removeTimescales(state.getSelectedTimescales());
+                    } else {
+                        scope.map.removeTimescales([ts])
+                    }
+                    break;
+            }
         }
     };
 };
@@ -254,7 +269,7 @@ const TimescaleStart = () => {
 
   return useObserver(() => <>
     {scope.map.timescalelist.filter(({ tsgroup }) => /* MappingState.group === -10 ||  */MappingState.group === tsgroup).map(ts =>
-      <TimescaleEl ts={ts} />)}
+      <TimescaleEl key={ts.id} ts={ts} />)}
   </>)
 }
 
@@ -265,28 +280,29 @@ const TimescaleEl = ({ ts }: { ts: TimeScale }) => {
     const onContextMenu = useMemo(() => contextMenuHandler(ts.id), [ts.id]);
     // const onDoubleClick = useMemo(() => doubleClickHandler(note.id), [note.id]);
     const onClick = useMemo(() => clickEventHandler(ts.id), [ts.id]);
-
   // const props = {
   //   onMouseDown,
   //   onContextMenu,
   //   onClick
   // }
 
-  return useObserver(() => 
-    <div className={cn.ts} key={ts.id} style={bottomstyle(ts.realtimecache)} onClick={onClick} onMouseDown={onMouseDown} onContextMenu={onContextMenu}>
+  return useObserver(() => {
+    return <div className={cn.ts} key={ts.id} style={bottomstyle(ts.realtimecache)} onClick={onClick} onMouseDown={onMouseDown} onContextMenu={onContextMenu} onTouchStart={onMouseDown}>
       <div className={cn.time}>{ts.timescale}x</div>
-    </div>)
+    </div>
+  })
 }
 
 const GridLayer = () => {
   const cn = useLayerStyle()
-  return (
+  return (<>
     <div className={cn.layer}>
       <LaneAndTime />
       <DivisorLines />
       <TimepointStart />
+    </div>
       <TimescaleStart />
-    </div>)
+  </>)
 }
 
 export default GridLayer

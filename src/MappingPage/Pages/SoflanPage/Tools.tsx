@@ -27,7 +27,7 @@ import { addHotkey } from "../../../Common/hooks"
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, DialogContentText, Divider } from "@material-ui/core"
 import { state } from "../MappingPage/Track/state"
 import { scope } from "../../../MappingScope/scope"
-import { randomId } from "../../../Common/utils"
+import { randomId, assert } from "../../../Common/utils"
 
 const useStyles = makeStyles(theme => ({
   tools: {
@@ -246,10 +246,17 @@ const TimeScaleGroupTool = () => {
           }
         </Select>
         <Button onClick={() => {setShowDialog(true); setTsgName(`TsGroup ${scope.map.tsgrouplist.length - 2}`)}}>Add Group</Button>
+        {(MappingState.group === -10) ? (<></>) : (<Button onClick={() => copyTSG()}>Copy Group</Button>)}
       </FormControl>{(MappingState.group < 0) ? (<></>) :
       (<><Button variant="text" onClick={() => { setShowEditDialog(true); setTsgName(scope.map.tsgroups.get(MappingState.group)!.name) }}>Edit</Button>
       <Button variant="text" color="secondary" onClick={() => setShowDeleteDialog(true)}>Delete</Button></>)}
     </Grid>)
+}
+
+const copyTSG = () => {
+  const id = randomId()
+  scope.map.copyTSG(assert(scope.map.tsgroups.get(MappingState.group)), id)
+  MappingState.group = id
 }
 
 const Tools = () => {

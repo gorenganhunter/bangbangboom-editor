@@ -121,9 +121,13 @@ const Track = () => {
   useEffect(() => {
     window.addEventListener("mousedown", handleDown)
     window.addEventListener("mousemove", handleMove)
+    window.addEventListener("touchstart", handleDown)
+    window.addEventListener("touchmove", handleMove)
     return () => {
       window.removeEventListener("mousedown", handleDown)
       window.removeEventListener("mousemove", handleMove)
+      window.removeEventListener("touchstart", handleDown)
+      window.removeEventListener("touchmove", handleMove)
     }
   }, [])
 
@@ -171,14 +175,16 @@ const Track = () => {
           setShowAddDialog(true)
         }
         break
-      case "delete":
-        const tsc = scope.map.timescalelist.find(({ timepoint, offset, tsgroup }) => timepoint === beat.timepoint.id && offset === beat.offset && tsgroup === MappingState.group)
-        if (!tsc) return
-        scope.map.removeTimescales([tsc])
-        break
+      // case "delete":
+      //   const tsc = scope.map.timescalelist.find(({ timepoint, offset, tsgroup }) => timepoint === beat.timepoint.id && offset === beat.offset && tsgroup === MappingState.group)
+      //   if (!tsc) return
+      //   scope.map.removeTimescales([tsc])
+      //   break
       default:
         return
     }
+  state.preventClick++;
+  setTimeout(() => state.preventClick--, 50);
   })
 
   const [showAddDialog, setShowAddDialog] = useState<boolean>(false)

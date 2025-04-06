@@ -13,6 +13,8 @@ import { Dialog, DialogTitle, DialogContent, TextField, FormControlLabel, Dialog
 import { useTranslation } from "react-i18next";
 
 let dragPointer = -1;
+let copy = 0;
+let ct = 0;
 const downEventHandler = action((nid: number) => {
     return action(
         (
@@ -22,6 +24,13 @@ const downEventHandler = action((nid: number) => {
         ) => {
             e.stopPropagation();
             e.preventDefault();
+            if (MappingState.tool === "delete") {
+
+                    state.preventClick++;
+                    setTimeout(() => state.preventClick--, 500);
+        return
+      }
+            if (Date.now() - ct > 200) copy = 0
             const note = assert(scope.map.notes.get(nid));
             if (dragPointer < 0) {
                 if ("buttons" in e) {
@@ -40,6 +49,7 @@ const downEventHandler = action((nid: number) => {
 });
 
 const handleUp = action((e: MouseEvent | TouchEvent) => {
+    // if (MappingState.tool === "delete") return
     if ("buttons" in e) {
         if (e.button !== dragPointer) return;
     } else {
@@ -57,11 +67,11 @@ const handleUp = action((e: MouseEvent | TouchEvent) => {
         if (!dt && !dl) return;
 
         const before = new Set<number>();
-        const copy = e.ctrlKey;
-        if (copy) for (const n of scope.map.notelist) before.add(n.id);
+        const isCopy = e.ctrlKey || copy;
+        if (isCopy) for (const n of scope.map.notelist) before.add(n.id);
 
         if (draggingSelected) {
-            if (copy)
+            if (isCopy)
                 scope.map.copyMany(
                     state.getSelectedNotes(),
                     dt,
@@ -81,7 +91,7 @@ const handleUp = action((e: MouseEvent | TouchEvent) => {
                     MappingState.division
                 );
         } else {
-            if (copy)
+            if (isCopy)
                 scope.map.copyMany(
                     [note],
                     dt,
@@ -104,7 +114,7 @@ const handleUp = action((e: MouseEvent | TouchEvent) => {
 
         setTimeout(
             action(() => {
-                if (copy && scope.map.notes.size !== before.size) {
+                if (isCopy && scope.map.notes.size !== before.size) {
                     state.selectedNotes.clear();
                     for (const n of scope.map.notelist) {
                         if (!before.has(n.id)) {
@@ -134,6 +144,8 @@ const clickEventHandler = (nid: number) => {
     return (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
+        copy = 1
+        ct = Date.now()
         // if (state.preventClick) return
         const note = assert(scope.map.notes.get(nid));
         if (e.ctrlKey) {
@@ -230,7 +242,7 @@ const Note = ({ note, setFlickDirDialog, setFlickDir }: { note: NoteType, setFli
     const cn = useNoteStyles();
 
     const onMouseDown = useMemo(() => downEventHandler(note.id), [note.id]);
-    const onContextMenu = useMemo(() => contextMenuHandler(note.id), [note.id]);
+    // const onContextMenu = useMemo(() => contextMenuHandler(note.id), [note.id]);
     const onDoubleClick = useMemo(() => doubleClickHandler(note.id, setFlickDirDialog, setFlickDir), [note.id]);
     const onClick = useMemo(() => clickEventHandler(note.id), [note.id]);
 
@@ -281,7 +293,8 @@ const Note = ({ note, setFlickDirDialog, setFlickDir }: { note: NoteType, setFli
             draggable: false,
             className: cn.note,
             onMouseDown,
-            onContextMenu,
+            onTouchStart: onMouseDown,
+            // onContextMenu,
             onDoubleClick,
             onClick,
         };
