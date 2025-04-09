@@ -93,7 +93,7 @@ const handleMove = action((e: MouseEvent | TouchEvent) => {
     const list = MappingState.timescaleListOrdered
     const start = binarySearch(i => list[i].realtimecache, list.length, state.pointerTime)[0]
     const end = binarySearch(i => list[i].realtimecache, list.length, state.selectingStartTime)[0]
-    state.selectingTimescales = (list.slice(Math.min(start, end), Math.max(start, end))).map(x => x.id)
+    state.selectingTimescales = (list.slice(Math.min(start, end), Math.max(start, end))).filter(ts => ts.tsgroup === MappingState.group).map(x => x.id)
   }
 })
 
