@@ -217,7 +217,7 @@ export class MapActions extends MapActionsBase {
         if (n.type === "slide") {
           const slide = slideidmap[n.slide]
           if (!slide) continue
-          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint.id, res.offset, n.tsgroup, targetLane)
+          const done = this.history.callAtom(SlideNoteActions.Add, randomId(), slide, res.timepoint.id, res.offset, n.tsgroup, targetLane, n.islaser, n.direction)
           if (!done) return false
         } else {
           const done = this.history.callAtom(SingleFlickActions.Add, randomId(), n.type, res.timepoint.id, res.offset, n.tsgroup, targetLane, n.alt)
