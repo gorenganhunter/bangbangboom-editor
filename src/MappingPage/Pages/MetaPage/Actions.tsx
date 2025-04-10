@@ -54,7 +54,7 @@ import {Music} from "../../../MappingPage/states"
 const exportD4C = () => {
     try {
         const content = toD4CFormat((scope.map as any).state)
-        downLoadFile(content.chart, "chart_00000014.json")
+        downLoadFile(content.chart, (scope.meta.name || "No title") + ".d4c.json")
     } catch(error) {
         openDialog(i18n.t("An error occurred during export"), i18n.t("" + error))
         userMessage(i18n.t("Error export"), "error")

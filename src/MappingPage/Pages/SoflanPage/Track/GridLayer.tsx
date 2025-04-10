@@ -40,6 +40,13 @@ const bottomstyle = (time: number) => ({ bottom: (MappingState.timeHeightFactor 
 
 const vertlines = range(15, 90, 10)
 
+const flushPointerPos2 = action((e: React.TouchEvent<HTMLDivElement>) => {
+    const touches = Array.from(e.changedTouches)
+    if (touches.length <= 0) return
+    state.pointerClientX = touches.reduce((a, b) => a + b.clientX, 0) / touches.length
+    state.pointerClientY = touches.reduce((a, b) => a + b.clientY, 0) / touches.length
+})
+
 let dragPointer = -1;
 let copy = 0
 let ct = 0
@@ -52,10 +59,10 @@ const downEventHandler = action((tsid: number) => {
         ) => {
             e.stopPropagation();
             e.preventDefault();
-            if (MappingState.tool === "delete") {
+            if (MappingState.tool === "delete" || MappingState.tool === "add") {
 
-                    state.preventClick++;
-                    setTimeout(() => state.preventClick--, 500);
+                    // state.preventClick++;
+                    // setTimeout(() => state.preventClick--, 50);
         return
       }
             if (Date.now() - ct > 200) copy = 0
@@ -66,6 +73,7 @@ const downEventHandler = action((tsid: number) => {
                     dragPointer = e.button;
                 } else {
                     dragPointer = e.changedTouches[0].identifier;
+          flushPointerPos2(e)
                 }
             }
             state.draggingTimescale = tsid;
@@ -166,11 +174,11 @@ const removeTimescale = (ts: TimeScale) => {
 
 const clickEventHandler = (tsid: number) => {
     return (e: React.MouseEvent) => {
-        e.stopPropagation();
+        if (MappingState.tool !== "add") e.stopPropagation();
         e.preventDefault();
         copy = 1
         ct = Date.now()
-        // if (state.preventClick) return
+        if (state.preventClick) return
         const ts = assert(scope.map.timescales.get(tsid));
         if (e.ctrlKey) {
             if (state.selectedTimescales.has(ts.id))
