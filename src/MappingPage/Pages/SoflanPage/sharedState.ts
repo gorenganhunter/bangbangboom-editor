@@ -91,7 +91,7 @@ export function GridD1() {
     endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat = 1
     while (true) {
-      const time = tp.time + tp.ticktimecache * 48 * beat
+      const time = tp.time + tp.ticktimecache * 192 * beat
       if (time >= endtime) break
       const bar = ((beat / tp.bpb) | 0) + 1
       const innerbeat = (beat % tp.bpb) + 1
@@ -114,9 +114,9 @@ export function GridD2() {
     const tp = tps[i]
     endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat = 0
-    const offset = tp.ticktimecache * 24
+    const offset = tp.ticktimecache * 96
     while (true) {
-      const time = tp.time + tp.ticktimecache * 48 * beat + offset
+      const time = tp.time + tp.ticktimecache * 192 * beat + offset
       if (time >= endtime) break
       list.push(time)
       beat++
@@ -134,7 +134,7 @@ export function GridD3() {
     endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat_3 = 1
     while (true) {
-      const time = tp.time + tp.ticktimecache * 16 * beat_3
+      const time = tp.time + tp.ticktimecache * 64 * beat_3
       if (time >= endtime) break
       list.push(time)
       beat_3++
@@ -153,7 +153,7 @@ export function GridD4() {
     endtime = (i < tps.length - 1 ? tps[i + 1].time : Music.duration) - 0.01
     let beat_2 = 0.5
     while (true) {
-      const time = tp.time + tp.ticktimecache * 24 * beat_2
+      const time = tp.time + tp.ticktimecache * 96 * beat_2
       if (time >= endtime) break
       list.push(time)
       beat_2++

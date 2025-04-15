@@ -140,8 +140,8 @@ const handleClick = action((e: React.MouseEvent<HTMLDivElement>) => {
             scope.map.timescalelist[i] = tsc
           }
           
-          const ii = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == beat?.timepoint.id && offset == beat?.offset + 6 && tsgroup == -1 && timescale == lastTs.timescale && disk == (lane == 0 ? 2 : 1)))
-          if (ii === -1) scope.map.addTimescale(-1, beat.timepoint.id, beat?.offset + 6, lastTs.timescale, lane == 0 ? 1 : 2)
+          const ii = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == beat?.timepoint.id && offset == beat?.offset + 24 && tsgroup == -1 && timescale == lastTs.timescale && disk == (lane == 0 ? 2 : 1)))
+          if (ii === -1) scope.map.addTimescale(-1, beat.timepoint.id, beat?.offset + 24, lastTs.timescale, lane == 0 ? 1 : 2)
           else {
             const tsc = scope.map.timescalelist[ii]
             tsc.disk = 3

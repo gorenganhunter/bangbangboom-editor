@@ -134,8 +134,14 @@ const Editor = () => {
                     <MenuItem value={4}>1 / 4</MenuItem>
                     <MenuItem value={6}>1 / 6</MenuItem>
                     <MenuItem value={8}>1 / 8</MenuItem>
+                    <MenuItem value={12}>1 / 12</MenuItem>
                     <MenuItem value={16}>1 / 16</MenuItem>
+                    <MenuItem value={24}>1 / 24</MenuItem>
+                    <MenuItem value={32}>1 / 32</MenuItem>
                     <MenuItem value={48}>1 / 48</MenuItem>
+                    <MenuItem value={64}>1 / 64</MenuItem>
+                    <MenuItem value={96}>1 / 96</MenuItem>
+                    <MenuItem value={192}>1 / 192</MenuItem>
                 </Select>
             </FormControl>
         </Grid>

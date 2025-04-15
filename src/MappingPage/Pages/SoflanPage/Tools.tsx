@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
 
 export const zoomin = () => {
   let f = MappingState.timeHeightFactor * 1.414
-  if (f > 1580) f = 1600
+  if (f > 6380) f = 6400
   MappingState.timeHeightFactor = f
 }
 export const zoomout = () => {
@@ -106,8 +106,14 @@ const SelectDivisor = () => {
           <MenuItem value={4}>1 / 4</MenuItem>
           <MenuItem value={6}>1 / 6</MenuItem>
           <MenuItem value={8}>1 / 8</MenuItem>
+          <MenuItem value={12}>1 / 12</MenuItem>
           <MenuItem value={16}>1 / 16</MenuItem>
+          <MenuItem value={24}>1 / 24</MenuItem>
+          <MenuItem value={32}>1 / 32</MenuItem>
           <MenuItem value={48}>1 / 48</MenuItem>
+          <MenuItem value={64}>1 / 64</MenuItem>
+          <MenuItem value={96}>1 / 96</MenuItem>
+          <MenuItem value={192}>1 / 192</MenuItem>
         </Select>
       </FormControl>
     </Grid>)
@@ -136,7 +142,7 @@ const ZoomInOut = () => {
   return useObserver(() =>
     <Grid item container spacing={2}>
       <Grid item>
-        <IconButton onClick={zoomin} disabled={MappingState.timeHeightFactor > 1580}
+        <IconButton onClick={zoomin} disabled={MappingState.timeHeightFactor > 6380}
           title={t("Hotkey: {{ hotkey }}", { hotkey: "+ / ctrl + wheel" })}>
           <ZoomInIcon /></IconButton>
       </Grid>

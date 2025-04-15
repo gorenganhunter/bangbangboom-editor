@@ -83,7 +83,7 @@ export function toD4DJGameFormat(map: EditMap): D4DJExport {
 
     chartNotes.forEach((note) => {
         const tp = assert(map.timepoints.get(note.timepoint));
-        const tpOffset = 60 / (tp.bpm * 48);
+        const tpOffset = 60 / (tp.bpm * 192);
 
         const time = tp.time + note.offset * tpOffset;
         const d4djNote: NoteData = {

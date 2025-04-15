@@ -14,7 +14,7 @@ export function toGameContent(map: EditMap): RawMap {
 
   for (const [, n] of map.notes) {
     if (n.type === "single")
-      notes.push({ type: "single", time: n.realtimecache, lane: n.lane, onbeat: n.offset % 24 === 0 })
+      notes.push({ type: "single", time: n.realtimecache, lane: n.lane, onbeat: n.offset % 96 === 0 })
     else if (n.type === "flick")
       notes.push({ type: "flick", time: n.realtimecache, lane: n.lane })
     else

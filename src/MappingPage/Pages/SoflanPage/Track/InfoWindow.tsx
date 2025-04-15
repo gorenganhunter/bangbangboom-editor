@@ -32,14 +32,14 @@ const InfoWindow = () => {
     const beat = state.pointerBeat
     if (!beat || beat.offset < 0) return
     const bpb = beat.timepoint.bpb
-    const beatcount = (beat.offset / 48) | 0
-    let offset = beat.offset % 48
-    while (offset < 0) offset += 48
-    const gcd = calcGCD(offset, 48)
+    const beatcount = (beat.offset / 192) | 0
+    let offset = beat.offset % 192
+    while (offset < 0) offset += 192
+    const gcd = calcGCD(offset, 192)
     return {
       time: beat.realtime,
       name: `${beat.timepointIndex + 1} : ${((beatcount / bpb) | 0) + 1} : ${(beatcount % bpb) + 1}`,
-      divide: `${offset / gcd} / ${48 / gcd}`
+      divide: `${offset / gcd} / ${192 / gcd}`
     }
   })
 

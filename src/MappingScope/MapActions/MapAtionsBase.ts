@@ -49,7 +49,7 @@ export class MapActionsBase extends CommonActions<EditMap> {
    * @param division - the division 
    */
   calcNearestPosition(time: number, division: number, ignore?: number) {
-    const tickcount = 48 / division
+    const tickcount = 192 / division
     const [tp, tpindex] = this.findTimepoint(time, ignore)
     if (!tp) return
     const offset = Math.round((time - tp.time) / (tp.ticktimecache * tickcount)) * tickcount
@@ -57,12 +57,12 @@ export class MapActionsBase extends CommonActions<EditMap> {
     const [rtp, rtpindex] = this.findTimepoint(realtime + tp.ticktimecache, ignore) // when its very near to next tp, switch to next
     if (rtp && rtp.id !== tp.id) return {
       timepoint: rtp,
-      /** count of 1/48 quarter beat */
+      /** count of 1/192 quarter beat */
       offset: 0, timepointIndex: rtpindex, realtime: rtp.time
     }
     return {
       timepoint: tp,
-      /** count of 1/48 quarter beat */
+      /** count of 1/192 quarter beat */
       offset, timepointIndex: tpindex, realtime
     }
   }

@@ -160,7 +160,7 @@ const clickEventHandler = (nid: number) => {
                             const ts = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset && tsgroup == -1 && timescale == -1 && disk == (note.lane == 0 ? 1 : 2)))
                             if (ts) scope.map.removeTimescales([ts])
                             
-                            const ts2 = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset + 6 && tsgroup == -1 && timescale == 1 && disk == (note.lane == 0 ? 1 : 2)))
+                            const ts2 = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset + 24 && tsgroup == -1 && timescale == 1 && disk == (note.lane == 0 ? 1 : 2)))
                             if (ts2) scope.map.removeTimescales([ts2])
                             
                             const ts3 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset && tsgroup == -1 && timescale == -1 && disk == 3))
@@ -170,7 +170,7 @@ const clickEventHandler = (nid: number) => {
                                 scope.map.timescalelist[ts3] = ts
                             }
                             
-                            const ts4 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset + 6 && tsgroup == -1 && timescale == 1 && disk == 3))
+                            const ts4 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset + 24 && tsgroup == -1 && timescale == 1 && disk == 3))
                             if (ts4 != -1) {
                                 const ts = scope.map.timescalelist[ts4]
                                 ts.disk = note.lane == 0 ? 2 : 1

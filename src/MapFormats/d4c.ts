@@ -135,7 +135,7 @@ export function toD4CFormat(map: EditMap): D4CExport {
         // const tp = assert(map.timepoints.get(note.timepoint));
         const tp = assert(ts.find(({ id }) => id === note.timepoint))
 
-        const beat = tp.fb + note.offset / 48;
+        const beat = tp.fb + note.offset / 192;
 
         const d4cNote: NoteData = {
             LaneId: note.lane,
@@ -219,7 +219,7 @@ export function toD4CFormat(map: EditMap): D4CExport {
         
             const tp = assert(ts.find(({ id }) => id === tsc.timepoint))
 
-            const beat = tp.fb + tsc.offset / 48;
+            const beat = tp.fb + tsc.offset / 192;
             return {
                 Beat: beat,
                 TimeScale: tsc.timescale,

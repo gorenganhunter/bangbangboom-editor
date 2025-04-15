@@ -21,7 +21,7 @@ export type Settings = {
     // timing
 
     justify_find_nearest: boolean
-    /** 1 | 2 | 3 | 4 | 6 | 8 | 16 | 48 */
+    /** 1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 | 64 | 96 | 192 */
     justify_grid_divisor: number
 
     show_info_window: boolean
@@ -47,7 +47,7 @@ export type Settings = {
 export const DefaultSettings: Settings = {
   general: { song_volume: 1, effect_volume: 1, background_dim: 0.7 },
   editor: {
-    keep_pitch: false, justify_find_nearest: true, justify_grid_divisor: 48, show_info_window: true,
+    keep_pitch: false, justify_find_nearest: true, justify_grid_divisor: 192, show_info_window: true,
     warn_for_same_pos_notes: true, autosave_interval: 5,
   },
   game: {

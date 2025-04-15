@@ -12,7 +12,7 @@ export type TimedPosition = {
   timepoint: number
 
   /**
-   * the count of 1/48 beats from that timepoint
+   * the count of 1/192 beats from that timepoint
    */
   offset: number
 
@@ -74,7 +74,7 @@ export type Timepoint = {
   bpm: number
 
   /**
-   * the cached time of 1/48 beat
+   * the cached time of 1/192 beat
    */
   ticktimecache: number
 
@@ -98,7 +98,7 @@ export type TimeScale = {
   timepoint: number
 
   /**
-   * the count of 1/48 beats from that timepoint
+   * the count of 1/192 beats from that timepoint
    */
   offset: number
   /**
@@ -111,6 +111,7 @@ export type TimeScale = {
 } & WithId
 
 type EditMapForJson = {
+  version?: number
   timepoints: Timepoint[]
   tsgroups: TimeScaleGroup[]
   timescales: TimeScale[]
@@ -166,6 +167,7 @@ export class EditMap {
   static toJsonString(map: DeepReadonly<EditMap>) {
     const { timepoints, tsgroups, timescales, slides, notes } = map as EditMap
     const forJson: EditMapForJson = {
+      version: 3,
       timepoints: entryList(timepoints).map(x => ({ ...x[1] })),
       tsgroups: entryList(tsgroups).map(x => ({ ...x[1] })),
       timescales: entryList(timescales).map(x => ({ ...x[1] })),
@@ -179,7 +181,11 @@ export class EditMap {
   }
 
   static fromJson(json: string): EditMap {
-    const { timepoints, tsgroups, timescales, slides, notes } = JSON.parse(json) as EditMapForJson
+    let { version, timepoints, tsgroups, timescales, slides, notes } = JSON.parse(json) as EditMapForJson
+    if (!version || version !== 3) {
+      notes = notes.map(n => ({ ...n, offset: n.offset * 4 }))
+      timescales = timescales.map(ts => ({ ...ts, offset: ts.offset * 4 }))
+    }
     const map: EditMap = {
       timepoints: new Map(timepoints.map(x => [x.id, x])),
       tsgroups: new Map(tsgroups.map(x => [x.id, x])),
@@ -201,7 +207,7 @@ export class EditMap {
 }
 
 export function FreshTimepointCache(tp: Timepoint) {
-  tp.ticktimecache = 60 / tp.bpm / 48
+  tp.ticktimecache = 60 / tp.bpm / 192
 }
 
 export function FreshNoteCache(map: EditMap, n: TimedPosition) {
