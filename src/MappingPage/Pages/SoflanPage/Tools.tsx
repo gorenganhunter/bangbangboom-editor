@@ -58,6 +58,7 @@ const SelectTool = () => {
   useEffect(() => addHotkey("2", () => MappingState.tool = "add"), [])
   useEffect(() => addHotkey("3", () => MappingState.tool = "delete"), [])
   useEffect(() => addHotkey("4", () => MappingState.tool = "set"), [])
+  useEffect(() => addHotkey("5", () => MappingState.tool = "interpolate"), [])
 
   return useObserver(() =>
     <Grid item>
@@ -88,6 +89,9 @@ const SelectTool = () => {
         <Divider />
         <FormControlLabel value="set" control={<Radio />}
           label={t("Set Note")} title={t("Hotkey: {{ hotkey }}", { hotkey: "4" })} />
+        <Divider />
+        <FormControlLabel value="interpolate" control={<Radio />}
+          label={t("Interpolate")} title={t("Hotkey: {{ hotkey }}", { hotkey: "5" })} />
       </RadioGroup>
     </Grid>)
 }

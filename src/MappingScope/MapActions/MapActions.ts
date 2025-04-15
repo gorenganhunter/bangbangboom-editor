@@ -1,6 +1,6 @@
 import { NoteType, SingleNote, FlickNote, FreshNoteCache, FreshTimescaleCache, TimeScale, SlideNote, TimeScaleGroup } from "../EditMap"
 import { SingleFlickActions } from "./AtomActions/SingleFlick"
-import { randomId, assert, neverHappen } from "../../Common/utils"
+import { randomId, assert, neverHappen, lerp } from "../../Common/utils"
 import { SlideActions } from "./AtomActions/Slide"
 import { SlideNoteActions } from "./AtomActions/SlideNote"
 import { TimepointActions } from "./AtomActions/Timepoint"
@@ -239,6 +239,25 @@ export class MapActions extends MapActionsBase {
         const res = assert(this.calcNearestPosition(targetTime, division))
         const done = this.history.callAtom(TimescaleActions.Add, randomId(), ts.tsgroup, ts.timescale, res.timepoint.id, res.offset, ts.disk)
         if (!done) return false
+      }
+      return true
+    }))
+  }
+  
+  @action.bound
+  interpolateTimescale(timescales: TimeScale[], division: number) {
+    return this.done(this.history.doTransaction(() => {
+      const tsSorted = timescales.sort((a, b) => a.realtimecache - b.realtimecache)
+      for (let i = 0; i < tsSorted.length - 1; i++) {
+        const tsA = tsSorted[i]
+        const tsB = tsSorted[i + 1]
+
+        if ((tsA.timepoint === tsB.timepoint) && (tsA.tsgroup === tsB.tsgroup) && (tsA.offset % (192/division) === 0) && (tsB.offset % (192/division) === 0)) {
+          for (let ii = tsA.offset + 192/division; ii < tsB.offset; ii += 192/division) {
+            const done = this.history.callAtom(TimescaleActions.Add, randomId(), tsA.tsgroup, Math.round(lerp(tsA.offset, tsB.offset, ii, tsA.timescale, tsB.timescale) * 100) / 100, tsA.timepoint, ii, tsA.disk)
+            if (!done) return false
+          }
+        }
       }
       return true
     }))

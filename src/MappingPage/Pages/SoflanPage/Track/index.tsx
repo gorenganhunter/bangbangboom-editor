@@ -78,6 +78,10 @@ const stopSelect = action(() => {
   for (const ts of state.selectingTimescales)
     state.selectedTimescales.add(ts)
   state.selectingTimescales = []
+  if (MappingState.tool === "interpolate") {
+    scope.map.interpolateTimescale(state.getSelectedTimescales(), MappingState.division)
+    state.selectedTimescales.clear()
+  }
   state.preventClick++
   setTimeout(() => state.preventClick--, 50)
 })

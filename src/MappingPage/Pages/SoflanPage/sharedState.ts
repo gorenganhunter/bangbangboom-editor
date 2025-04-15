@@ -4,7 +4,7 @@ import { scope } from "../../../MappingScope/scope"
 import { assert } from "../../../Common/utils"
 import { NoteType } from "../../../MappingScope/EditMap"
 
-export type ToolTypes = "none" | "add" | "delete" | "set"
+export type ToolTypes = "none" | "add" | "delete" | "set" | "interpolate"
 
 const NoteSig = (n: NoteType) => `${n.timepoint}:${n.offset}:${n.lane}`
 
