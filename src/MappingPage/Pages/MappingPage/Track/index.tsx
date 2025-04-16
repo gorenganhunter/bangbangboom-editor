@@ -15,6 +15,7 @@ import BarLayer from "./BarLayer"
 import WarningLayer from "./WarningLayer"
 import { binarySearch } from "../../../../Common/binarySearch"
 import { assert } from "../../../../Common/utils"
+import { zoomin, zoomout } from "../Tools"
 
 const transY = (viewTime: number) => `translateY(${MappingState.timeHeightFactor * viewTime}px)`
 
@@ -44,10 +45,18 @@ const flushPointerPos2 = action((e: React.TouchEvent<HTMLDivElement>) => {
     state.pointerClientY = touches.reduce((a, b) => a + b.clientY, 0) / touches.length
 })
 
+let lastTouchY: any = {}
 let selectPointer = -1
 const handleDown = action((e: MouseEvent | TouchEvent) => {
   e.stopPropagation()
   e.preventDefault()
+  if ("touches" in e && e.touches.length === 2) {
+    stopSelect()
+    // twoFinger = true
+    lastTouchY[e.touches[0].identifier] = e.touches[0].clientY
+    lastTouchY[e.touches[1].identifier] = e.touches[1].clientY
+    return
+  }
   if (document.activeElement && "blur" in document.activeElement) {
     (document.activeElement as HTMLElement).blur()
   }
@@ -82,10 +91,53 @@ window.addEventListener("mouseup", e => {
 })
 window.addEventListener("touchend", e => {
   if (e.changedTouches[0].identifier === selectPointer) stopSelect()
+  if (state.zooming && !e.touches.length) {
+    state.zooming = false
+  }
+  if (state.scrolling && !e.touches.length) {
+    state.scrolling = false
+  }
 })
+
+function getBaseLog(x: number, y: number) {
+    return Math.log(y) / Math.log(x);
+}
 
 const handleMove = action((e: MouseEvent | TouchEvent) => {
   flushPointerPos(e)
+  if ("touches" in e && e.touches.length === 2) {
+    if (state.scrolling) {
+      let delta = (lastTouchY[e.touches[0].identifier] - e.touches[0].clientY + lastTouchY[e.touches[1].identifier] - e.touches[1].clientY) / 2
+      MappingState.setViewposition(MappingState.getViewposition() - delta / MappingState.timeHeightFactor)
+    } else if (state.zooming) {
+      let oldDistance = Math.abs(lastTouchY[e.touches[0].identifier] - lastTouchY[e.touches[1].identifier])
+      let distance = Math.abs(e.touches[0].clientY - e.touches[1].clientY)
+      const n = getBaseLog(1.414, distance / oldDistance)
+      if (n >= 1) zoomin()
+      else if (n <= -1) zoomout()
+      else return
+    } else {
+      let delta = (lastTouchY[e.touches[0].identifier] - e.touches[0].clientY + lastTouchY[e.touches[1].identifier] - e.touches[1].clientY) / 2
+      let oldDistance = Math.abs(lastTouchY[e.touches[0].identifier] - lastTouchY[e.touches[1].identifier])
+      let distance = Math.abs(e.touches[0].clientY - e.touches[1].clientY)
+      if (Math.abs(distance - oldDistance) > 15) {
+        state.zooming = true
+        const n = getBaseLog(1.414, distance / oldDistance)
+        if (n >= 1) zoomin()
+        else if (n <= -1) zoomout()
+        else return
+      } else if (Math.abs(delta) > 5) {
+        state.scrolling = true
+        MappingState.setViewposition(MappingState.getViewposition() - delta / MappingState.timeHeightFactor)
+      } else return
+    }
+    
+    lastTouchY[e.touches[0].identifier] = e.touches[0].clientY
+    lastTouchY[e.touches[1].identifier] = e.touches[1].clientY
+    
+    return
+  }
+  if (state.zooming || state.scrolling) return
   if (!("buttons" in e) || e.buttons & 3) {
     if (state.draggingNote < 0 && !state.selecting)
       if (Math.abs(state.pointerTime - state.selectingStartTime) > 50 / MappingState.timeHeightFactor

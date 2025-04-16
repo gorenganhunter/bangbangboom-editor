@@ -59,6 +59,9 @@ class State {
   @observable selectingStartLeft = 0
   @observable selectingTimescales: number[] = []
 
+  @observable scrolling = false
+  @observable zooming = false
+
   @observable selectedTimescales = new Set<number>()
 
   @observable selectedSoflan: number = -10

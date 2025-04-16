@@ -60,6 +60,9 @@ class State {
   @observable selectingStartLeft = 0
   @observable selectingNotes: number[] = []
 
+  @observable scrolling = false
+  @observable zooming = false
+
   @observable selectedNotes = new Set<number>()
 
   getSelectedNotes = () => {
