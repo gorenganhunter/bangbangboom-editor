@@ -44,7 +44,7 @@ export type D4CSoflanGroup = {
 }
 
 export type D4CBarLineData = number | {
-    Time: number;
+    Beat: number;
     TimeScaleGroupId?: string;
 }
 
@@ -178,7 +178,7 @@ export function d4cToLevelData(chart: D4CChartData, offset = 0): any {
         data: [
             {
                 name: "#BEAT",
-                value: typeof br == "number" ? br : br.Time,
+                value: typeof br == "number" ? br : br.Beat,
             },
             {
                 name: "timeScaleGroup",
@@ -187,8 +187,18 @@ export function d4cToLevelData(chart: D4CChartData, offset = 0): any {
         ],
     }));
     let notes = note(chart);
+    const lastNoteBeat = chart.NoteDataList[chart.NoteDataList.length - 1].Beat
+    let lastBlBeat = chart.BarLine.List[chart.BarLine.List.length - 1]
+    lastBlBeat = typeof lastBlBeat === "number" ? lastBlBeat : lastBlBeat.Beat
+    
+    const end = chart.BpmDataList.map((data, i, arr) => 60 / data.Bpm * ((i < arr.length - 1 ? arr[i + 1].Beat : Math.max(lastNoteBeat, lastBlBeat)) - data.Beat)).reduce((a, b) => a + b) + chart.Offset + offset + 5
 
-    data.entities.push(...bpm, ...ts.flat(), ...notes, ...bl);
+    const sd = Array.from({ length: end * 120 / 16 }, (_, index) => ({
+      archetype: 'SliderData',
+      data: [],
+    }))
+
+    data.entities.push(...bpm, ...ts.flat(), ...notes, ...bl, ...sd);
     return data;
 }
 
