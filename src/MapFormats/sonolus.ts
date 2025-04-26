@@ -187,8 +187,9 @@ export function d4cToLevelData(chart: D4CChartData, offset = 0): any {
         ],
     }));
     let notes = note(chart);
+
     const lastNoteBeat = chart.NoteDataList[chart.NoteDataList.length - 1].Beat
-    let lastBlBeat = chart.BarLine.List[chart.BarLine.List.length - 1]
+    let lastBlBeat: any = chart.BarLine.List[chart.BarLine.List.length - 1]
     lastBlBeat = typeof lastBlBeat === "number" ? lastBlBeat : lastBlBeat.Beat
     
     const end = chart.BpmDataList.map((data, i, arr) => 60 / data.Bpm * ((i < arr.length - 1 ? arr[i + 1].Beat : Math.max(lastNoteBeat, lastBlBeat)) - data.Beat)).reduce((a, b) => a + b) + chart.Offset + offset + 5
