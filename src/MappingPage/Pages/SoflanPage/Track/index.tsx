@@ -91,6 +91,10 @@ const stopSelect = action(() => {
     scope.map.interpolateTimescale(state.getSelectedTimescales(), MappingState.division)
     state.selectedTimescales.clear()
   }
+  if (MappingState.tool === "snap") {
+    scope.map.snapTimescale(state.getSelectedTimescales(), MappingState.division)
+    state.selectedTimescales.clear()
+  }
   state.preventClick++
   setTimeout(() => state.preventClick--, 50)
 })

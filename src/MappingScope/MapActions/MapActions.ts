@@ -262,6 +262,18 @@ export class MapActions extends MapActionsBase {
       return true
     }))
   }
+  
+  @action.bound
+  snapTimescale(timescales: TimeScale[], division: number) {
+    return this.done(this.history.doTransaction(() => {
+      for (const t of timescales) {
+        const n = Math.round(t.offset / (192 / division)) * (192 / division)
+        if (n !== t.offset) this.patchTimescale(t, { offset: n })
+        FreshTimescaleCache(this.state, t)
+      }
+      return true
+    }))
+  }
 
   @action.bound
   copyTSG(tsgroup: TimeScaleGroup, tsgid: number) {
