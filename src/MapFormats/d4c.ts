@@ -125,10 +125,10 @@ export function toD4CFormat(map: EditMap): D4CExport {
 
     const chartNotes = Array.from(map.notes.values()).sort(
         (a: NoteType, b: NoteType) => {
-            return getTimepoint(a.timepoint)?.time - getTimepoint(b.timepoint)?.time || a.offset - b.offset 
+            return getTimepoint(a.timepoint)?.time - getTimepoint(b.timepoint)?.time || a.offset - b.offset
         }
     )
-    
+
     const lastDirFlickNote = chartNotes.filter(n => ((n.type === "slide" && n.islaser) || (n.type === "flick" && n.lane !== 0 && n.lane !== 6))).sort((a, b) => b.realtimecache - a.realtimecache)[0]
 
     chartNotes.forEach((note) => {
@@ -187,6 +187,9 @@ export function toD4CFormat(map: EditMap): D4CExport {
                         d4cNote.Type = D4CNoteType.Slide;
                 }
             } else {
+                if (slideNotes.indexOf(note.id) !== 0 && !note.islaser) {
+                    d4cNote.Type = D4CNoteType.LongMiddle
+                }
                 const nextId = slideNotes[slideNotes.indexOf(note.id) + 1];
                 const next = chartNotes.findIndex((n) => n.id === nextId);
                 d4cNote.NextId = next;
@@ -216,7 +219,7 @@ export function toD4CFormat(map: EditMap): D4CExport {
         id: tsg.id,
         SoflanDataList: tsg.timescales.map(id => {
             const tsc = map.timescales.get(id)!
-        
+
             const tp = assert(ts.find(({ id }) => id === tsc.timepoint))
 
             const beat = tp.fb + tsc.offset / 192;

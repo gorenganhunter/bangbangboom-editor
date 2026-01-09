@@ -18,7 +18,7 @@ const clickHandler = (slide: number) => {
         const s = assert(scope.map.slides.get(slide));
         const firstNote = assert(scope.map.notes.get(s.notes[0])) as SlideNote;
 
-        if (!firstNote.islaser) return;
+        // if (!firstNote.islaser) return;
 
         scope.map.addSlideMid(
             slide,
@@ -67,8 +67,8 @@ const Bar = ({
     const classname = note.islaser
         ? dark ? cn.laserdark : cn.laser
         : note.lane == 0 || note.lane == 6
-        ? dark ? cn.stopdark : cn.stop
-        : dark ? cn.slidebardark : cn.slidebar;
+            ? dark ? cn.stopdark : cn.stop
+            : dark ? cn.slidebardark : cn.slidebar;
 
     return <div className={classname} onClick={handler} style={style}></div>;
 };
@@ -105,7 +105,7 @@ const BarLayer = () => {
     const list = useObserver(() => {
         const list: React.ReactNode[] = [];
         forEachBar((from, to) =>
-            list.push(Bar({from, to, layerWidth, cn: noteCn}))
+            list.push(Bar({ from, to, layerWidth, cn: noteCn }))
         );
         return list;
     });

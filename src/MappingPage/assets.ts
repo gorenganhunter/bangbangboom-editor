@@ -16,6 +16,7 @@ const assets = {
   d4dj_slide: "/assets/mapping/d4dj_slide.png",
   d4dj_slide_flick: "/assets/mapping/d4dj_slide_flick.png",
   d4dj_hold: "/assets/mapping/d4dj_hold.png",
+  d4dj_hold_tick: "/assets/mapping/d4dj_hold_tick.png",
   d4dj_flick: "/assets/mapping/d4dj_flick.png",
 
   d4dj_tap_sfx: "/assets/mapping/d4dj_tap.mp3",

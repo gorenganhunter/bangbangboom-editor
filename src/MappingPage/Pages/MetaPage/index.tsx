@@ -19,15 +19,15 @@ const useStyles = makeStyles(() => ({
 const Links = () =>
   <Grid item>
     <Typography align="right" color="textSecondary">
+      <Link target="_blank" rel="noopener noreferrer" href="https://coconut.sonolus.com/d4c-custom-mix">
+        Sonolus Custom Chart Server
+      </Link>&nbsp;|&nbsp;
       <Link target="_blank" rel="noopener noreferrer" href="https://github.com/GEEKiDoS/D4DJ-Tools">
         D4DJ Tools
-    </Link>&nbsp;|&nbsp;
-    <Link target="_blank" rel="noopener noreferrer" href="http://girlbands.party/d4dj/chart-previewer/">
-        D4DJ Chart Previewer
-    </Link>&nbsp;|&nbsp;
-    <Link target="_blank" rel="noopener noreferrer" href="https://github.com/K024/bangbangboom-editor">
+      </Link>&nbsp;|&nbsp;
+      <Link target="_blank" rel="noopener noreferrer" href="https://github.com/K024/bangbangboom-editor">
         About bangbangboom editor & translations
-    </Link>
+      </Link>
     </Typography>
   </Grid>
 

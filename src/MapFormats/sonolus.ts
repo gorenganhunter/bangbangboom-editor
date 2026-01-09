@@ -78,10 +78,10 @@ export function d4cToLevelData(chart: D4CChartData, offset = 0): any {
     //     if (i === -1) d4chart[1].push(ts)
     //     else d4chart[1][i][2] = 3
     // })
-    
+
     let disc = {
-        left: chart.TimeScaleGroupList.flatMap(tsg => tsg.SoflanDataList).filter((soflan: D4CSoflanData) => [1,3].includes(soflan.LeftRight)).sort((a, b) => a.Beat - b.Beat),
-        right: chart.TimeScaleGroupList.flatMap(tsg => tsg.SoflanDataList).filter((soflan: D4CSoflanData) => [2,3].includes(soflan.LeftRight)).sort((a, b) => a.Beat - b.Beat)
+        left: chart.TimeScaleGroupList.flatMap(tsg => tsg.SoflanDataList).filter((soflan: D4CSoflanData) => [1, 3].includes(soflan.LeftRight)).sort((a, b) => a.Beat - b.Beat),
+        right: chart.TimeScaleGroupList.flatMap(tsg => tsg.SoflanDataList).filter((soflan: D4CSoflanData) => [2, 3].includes(soflan.LeftRight)).sort((a, b) => a.Beat - b.Beat)
     }
 
     chart.TimeScaleGroupList.push({ id: -4, SoflanDataList: disc.left }, { id: -3, SoflanDataList: disc.right })
@@ -188,18 +188,18 @@ export function d4cToLevelData(chart: D4CChartData, offset = 0): any {
     }));
     let notes = note(chart);
 
-    const lastNoteBeat = chart.NoteDataList[chart.NoteDataList.length - 1].Beat
-    let lastBlBeat: any = chart.BarLine.List[chart.BarLine.List.length - 1]
-    lastBlBeat = typeof lastBlBeat === "number" ? lastBlBeat : lastBlBeat.Beat
-    
-    const end = chart.BpmDataList.map((data, i, arr) => 60 / data.Bpm * ((i < arr.length - 1 ? arr[i + 1].Beat : Math.max(lastNoteBeat, lastBlBeat)) - data.Beat)).reduce((a, b) => a + b) + chart.Offset + offset + 5
+    // const lastNoteBeat = chart.NoteDataList[chart.NoteDataList.length - 1].Beat
+    // let lastBlBeat: any = chart.BarLine.List[chart.BarLine.List.length - 1]
+    // lastBlBeat = typeof lastBlBeat === "number" ? lastBlBeat : lastBlBeat.Beat
+    //
+    // const end = chart.BpmDataList.map((data, i, arr) => 60 / data.Bpm * ((i < arr.length - 1 ? arr[i + 1].Beat : Math.max(lastNoteBeat, lastBlBeat)) - data.Beat)).reduce((a, b) => a + b) + chart.Offset + offset + 5
+    //
+    // const sd = Array.from({ length: end * 120 / 16 }, (_, index) => ({
+    //     archetype: 'SliderData',
+    //     data: [],
+    // }))
 
-    const sd = Array.from({ length: end * 120 / 16 }, (_, index) => ({
-      archetype: 'SliderData',
-      data: [],
-    }))
-
-    data.entities.push(...bpm, ...ts.flat(), ...notes, ...bl, ...sd);
+    data.entities.push(...bpm, ...ts.flat(), ...notes, ...bl);
     return data;
 }
 
@@ -213,22 +213,22 @@ function note(chart: D4CChartData): any[] {
                 Type === D4CNoteType.Tap1
                     ? "DarkTapNote"
                     : Type === D4CNoteType.Tap2
-                      ? "LightTapNote"
-                      : Type === D4CNoteType.Scratch
-                        ? "ScratchNote"
-                        : Type === D4CNoteType.StopStart
-                          ? "StopStartNote"
-                          : Type === D4CNoteType.StopEnd
-                            ? "StopEndNote"
-                            : Type === D4CNoteType.LongStart
-                              ? "HoldStartNote"
-                              : Type === D4CNoteType.LongEnd
-                                ? "HoldEndNote"
-                                : Type === D4CNoteType.LongMiddle
-                                  ? "HoldMiddleNote"
-                                  : Direction !== 0
-                                    ? "SliderFlickNote"
-                                    : "SliderTickNote",
+                        ? "LightTapNote"
+                        : Type === D4CNoteType.Scratch
+                            ? "ScratchNote"
+                            : Type === D4CNoteType.StopStart
+                                ? "StopStartNote"
+                                : Type === D4CNoteType.StopEnd
+                                    ? "StopEndNote"
+                                    : Type === D4CNoteType.LongStart
+                                        ? "HoldStartNote"
+                                        : Type === D4CNoteType.LongEnd
+                                            ? "HoldEndNote"
+                                            : Type === D4CNoteType.LongMiddle
+                                                ? "HoldMiddleNote"
+                                                : Direction !== 0
+                                                    ? "SliderFlickNote"
+                                                    : "SliderTickNote",
 
             data: [
                 {
@@ -248,11 +248,11 @@ function note(chart: D4CChartData): any[] {
             name: `note${i}`,
         };
 
-        notes[Beat]
+        if (Type !== D4CNoteType.LongMiddle) notes[Beat]
             ? notes[Beat].push({ name: `note${i}`, lane: LaneId })
             : (notes[Beat] = [{ name: `note${i}`, lane: LaneId }]);
 
-        if (NextId && (Type === D4CNoteType.LongStart || Type === D4CNoteType.StopStart)) {
+        if (NextId && (Type === D4CNoteType.LongStart || Type === D4CNoteType.StopStart || Type === D4CNoteType.LongMiddle)) {
             let note: any = {};
             note.head = not.name;
             note.tail = `note${NextId}`;
@@ -280,7 +280,7 @@ function note(chart: D4CChartData): any[] {
                 });
         }
 
-        if (Type === D4CNoteType.LongEnd || Type === D4CNoteType.StopEnd) {
+        if (Type === D4CNoteType.LongEnd || Type === D4CNoteType.StopEnd || Type === D4CNoteType.LongMiddle) {
             not.data.push({
                 name: "head",
                 ref: hold.find((note) => note.tail === not.name).head,
@@ -362,24 +362,24 @@ function note(chart: D4CChartData): any[] {
 }
 
 const zlibOptions = {
-      level: 9,
+    level: 9,
 }
 
 export const compressSync = <T>(data: T): Buffer => gzipSync(JSON.stringify(data), zlibOptions)
 export const hash = (buffer: Buffer): string => createHash('sha1').update(buffer).digest('hex')
 
 type SonolusExport = {
-  name: string
-  data: Buffer
+    name: string
+    data: Buffer
 }
 
 export function toSonolusLevelData(map: EditMap): SonolusExport {
-  let data = d4cToLevelData(JSON.parse(toD4CFormat(map).chart))
-  data = compressSync(data)
-  const name = hash(data)
+    let data = d4cToLevelData(JSON.parse(toD4CFormat(map).chart))
+    data = compressSync(data)
+    const name = hash(data)
 
-  return {
-    name,
-    data
-  }
+    return {
+        name,
+        data
+    }
 }

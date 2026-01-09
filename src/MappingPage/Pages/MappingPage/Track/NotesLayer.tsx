@@ -26,10 +26,10 @@ const downEventHandler = action((nid: number) => {
             e.preventDefault();
             if (MappingState.tool === "delete") {
 
-                    state.preventClick++;
-                    setTimeout(() => state.preventClick--, 500);
-        return
-      }
+                state.preventClick++;
+                setTimeout(() => state.preventClick--, 500);
+                return
+            }
             if (Date.now() - ct > 200) copy = 0
             const note = assert(scope.map.notes.get(nid));
             if (dragPointer < 0) {
@@ -159,17 +159,17 @@ const clickEventHandler = (nid: number) => {
                         if (note.type === "flick") {
                             const ts = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset && tsgroup == -1 && timescale == -1 && disk == (note.lane == 0 ? 1 : 2)))
                             if (ts) scope.map.removeTimescales([ts])
-                            
+
                             const ts2 = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset + 24 && tsgroup == -1 && timescale == 1 && disk == (note.lane == 0 ? 1 : 2)))
                             if (ts2) scope.map.removeTimescales([ts2])
-                            
+
                             const ts3 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset && tsgroup == -1 && timescale == -1 && disk == 3))
                             if (ts3 != -1) {
                                 const ts = scope.map.timescalelist[ts3]
                                 ts.disk = note.lane == 0 ? 2 : 1
                                 scope.map.timescalelist[ts3] = ts
                             }
-                            
+
                             const ts4 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note.timepoint && offset == note.offset + 24 && tsgroup == -1 && timescale == 1 && disk == 3))
                             if (ts4 != -1) {
                                 const ts = scope.map.timescalelist[ts4]
@@ -181,17 +181,17 @@ const clickEventHandler = (nid: number) => {
                             const [note1, note2] = slide?.notes.map(id => scope.map.notes.get(id)).sort((a, b) => a!.realtimecache - b!.realtimecache)
                             const ts = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note1!.timepoint && offset == note1!.offset && tsgroup == -1 && timescale == 0 && disk == (note1!.lane == 0 ? 1 : 2)))
                             if (ts) scope.map.removeTimescales([ts])
-                            
+
                             const ts2 = scope.map.timescalelist.find(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note2!.timepoint && offset == note2!.offset && tsgroup == -1 && timescale == 1 && disk == (note2!.lane == 0 ? 1 : 2)))
                             if (ts2) scope.map.removeTimescales([ts2])
-                            
+
                             const ts3 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note1!.timepoint && offset == note1!.offset && tsgroup == -1 && timescale == 0 && disk == 3))
                             if (ts3 != -1) {
                                 const ts = scope.map.timescalelist[ts3]
                                 ts.disk = note.lane == 0 ? 2 : 1
                                 scope.map.timescalelist[ts3] = ts
                             }
-                            
+
                             const ts4 = scope.map.timescalelist.findIndex(({ timepoint, offset, tsgroup, timescale, disk }) => (timepoint == note2!.timepoint && offset == note2!.offset && tsgroup == -1 && timescale == 1 && disk == 3))
                             if (ts4 != -1) {
                                 const ts = scope.map.timescalelist[ts4]
@@ -281,7 +281,11 @@ const Note = ({ note, setFlickDirDialog, setFlickDir }: { note: NoteType, setFli
                 } else if (note.lane == 0 || note.lane == 6) {
                     src = assets.d4dj_stop;
                 } else {
-                    src = assets.d4dj_hold;
+                    if (note.id === slide.notes[slide.notes.length - 1] || note.id === slide.notes[0]) {
+                        src = assets.d4dj_hold;
+                    } else {
+                        src = assets.d4dj_hold_tick;
+                    }
                 }
 
                 break;
@@ -303,7 +307,7 @@ const Note = ({ note, setFlickDirDialog, setFlickDir }: { note: NoteType, setFli
             imgProps.style = style
             return (<img alt="" {...imgProps} />)
         }
-        
+
         imgProps.style = { ...style, zIndex: 5 }
 
         return (<><div className={cn.overlay} style={{ ...style, zIndex: 6 }}></div><img alt="" {...imgProps} /></>)
@@ -325,20 +329,20 @@ const NotesLayer = () => {
     }
 
     return useObserver(() => (<>
-    <Dialog open={flickDirDialog} onClose={() => { setFlickDirDialog(false); setTimeout(() => state.preventClick--, 50); }} classes={{ paper: cn.paper }}>
-      <DialogTitle>Edit Direction</DialogTitle>
-      <DialogContent>
-          <TextField inputProps={{ inputMode: "numeric" }} required autoFocus label="Direction" value={flickDir} onChange={e => setFlickDir(e.target.value)} fullWidth />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => { setFlickDirDialog(false); setTimeout(() => state.preventClick--, 50); }} color="secondary">
-          {t("Close")}
-        </Button>
-        <Button onClick={setDir} color="primary">
-          {t("Save")}
-        </Button>
-      </DialogActions>
-    </Dialog >
+        <Dialog open={flickDirDialog} onClose={() => { setFlickDirDialog(false); setTimeout(() => state.preventClick--, 50); }} classes={{ paper: cn.paper }}>
+            <DialogTitle>Edit Direction</DialogTitle>
+            <DialogContent>
+                <TextField inputProps={{ inputMode: "numeric" }} required autoFocus label="Direction" value={flickDir} onChange={e => setFlickDir(e.target.value)} fullWidth />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => { setFlickDirDialog(false); setTimeout(() => state.preventClick--, 50); }} color="secondary">
+                    {t("Close")}
+                </Button>
+                <Button onClick={setDir} color="primary">
+                    {t("Save")}
+                </Button>
+            </DialogActions>
+        </Dialog >
         <div className={cn.layer} ref={layer}>
             {scope.map.notelist.map((n) => (
                 <Note key={n.id} note={n} setFlickDir={setFlickDir} setFlickDirDialog={setFlickDirDialog} />

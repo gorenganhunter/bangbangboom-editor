@@ -88,12 +88,12 @@ export const drawScrollBar = (canvas: HTMLCanvasElement) => {
     let width = 10;
 
     if (from.islaser) {
-        ctx.fillStyle = "rgb(255,59,114,0.5)";
-        width = 2;
+      ctx.fillStyle = "rgb(255,59,114,0.5)";
+      width = 2;
     } else if (from.lane == 0 || from.lane == 6) {
-        ctx.fillStyle = "rgb(255,0,0,0.5)";
+      ctx.fillStyle = "rgb(255,0,0,0.5)";
     } else {
-        ctx.fillStyle = "rgb(255,255,0,0.5)";
+      ctx.fillStyle = "rgb(255,255,0,0.5)";
     }
 
     let to: NoteType
@@ -111,7 +111,7 @@ export const drawScrollBar = (canvas: HTMLCanvasElement) => {
         drawSquare(ctx, getX(n.lane), getY(n.realtimecache))
         break
       case "flick":
-        if(n.lane == 0 || n.lane == 6) {
+        if (n.lane == 0 || n.lane == 6) {
           ctx.fillStyle = "rgb(240,150,20)"
           drawOval(ctx, getX(n.lane), getY(n.realtimecache))
         } else {
@@ -122,21 +122,36 @@ export const drawScrollBar = (canvas: HTMLCanvasElement) => {
         break
       case "slide":
         const sn = n as SlideNote;
+        const slide = assert(scope.map.slides.get(n.slide))
 
-        if(sn.islaser) {
+        if (sn.islaser) {
           ctx.fillStyle = "rgba(255,59,114)"
           drawSlide(ctx, getX(n.lane), getY(n.realtimecache))
           break
         }
 
-        ctx.fillStyle = "rgba(1,219,1)"
+        //ctx.fillStyle = "rgba(1,219,1)"
 
-        if(n.lane == 0 || n.lane == 6) {
-          ctx.fillStyle = "rgb(240,20,20)"
-          drawOval(ctx, getX(n.lane), getY(n.realtimecache))
+        if (n.lane == 0 || n.lane == 6) {
+          if (n.id === slide.notes[0] || n.id === slide.notes[slide.notes.length - 1]) {
+            ctx.fillStyle = "rgb(240,20,20)"
+            drawOval(ctx, getX(n.lane), getY(n.realtimecache))
+          } else {
+            ctx.strokeStyle = "rgb(240, 20, 20)"
+            ctx.lineWidth = 2
+            const x = getX(n.lane)
+            drawLine(ctx, x, x + 10, getY(n.realtimecache))
+          }
         } else {
-          ctx.fillStyle = "rgb(240,240,20)"
-          drawSquare(ctx, getX(n.lane), getY(n.realtimecache))
+          if (n.id === slide.notes[0] || n.id === slide.notes[slide.notes.length - 1]) {
+            ctx.fillStyle = "rgb(240,240,20)"
+            drawSquare(ctx, getX(n.lane), getY(n.realtimecache))
+          } else {
+            ctx.strokeStyle = "rgb(240, 240, 20)"
+            ctx.lineWidth = 2
+            const x = getX(n.lane)
+            drawLine(ctx, x, x + 10, getY(n.realtimecache))
+          }
         }
 
         break
